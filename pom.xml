@@ -21,6 +21,28 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
+    
+    <!--  jedis  -->
+    <dependency>
+        <groupId>redis.clients</groupId>
+        <artifactId>jedis</artifactId>
+        <version>2.9.0</version>
+    </dependency>
+    
+	<!--  Gava java常用工具类库  -->
+    <dependency>
+    	<groupId>com.google.guava</groupId>
+    	<artifactId>guava</artifactId>
+    	<version>25.1-jre</version>
+    </dependency>
+    
+    <dependency>
+    	<groupId>org.apache.commons</groupId>
+    	<artifactId>commons-lang3</artifactId>
+    	<version>3.7</version>
+	</dependency>
+    
+
   </dependencies>
   
   
