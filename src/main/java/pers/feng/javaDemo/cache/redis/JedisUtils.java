@@ -1,6 +1,7 @@
 package pers.feng.javaDemo.cache.redis;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,10 +23,16 @@ import redis.clients.jedis.exceptions.JedisException;
 public class JedisUtils {
 	private static Logger logger = LoggerFactory.getLogger(JedisUtils.class);
 	
+    private static final String SET_IF_NOT_EXIST = "NX";       
+    private static final String SET_WITH_EXPIRE_TIME = "PX";  //è®¾ç½®è¿‡æœŸæ—¶é—´
+    private static final String LOCK_SUCCESS = "OK";          //æ·»åŠ åˆ†å¸ƒå¼é”æˆåŠŸæ ‡è¯†
+	private static final Long RELEASE_SUCCESS = 1L;           //é‡Šæ”¾åˆ†å¸ƒå¼é”æ ‡è¯†
+	
 	/**
-	 * ×Ö·û´®´¦ÀíÍ³Ò»±àÂë
+	 * å­—ç¬¦ä¸²å¤„ç†ç»Ÿä¸€ç¼–ç 
 	 */
 	private static final String CHARSET = "UTF-8";
+	
 	private static  JedisPool jedisPool = null;
 	 
 	 //	private static JedisPool jedisPool = SpringContextHolder.getBean(JedisPool.class);
@@ -33,21 +40,23 @@ public class JedisUtils {
 	 
 	 private JedisUtils(){ }
 	 
+	 
+	 
 	/**
-	 * »ñÈ¡×ÊÔ´ (µ¥»ú°æredis)
+	 * è·å–èµ„æº (å•æœºç‰ˆredis)
 	 * @return
 	 * @throws JedisException
 	 */
 	 public static synchronized Jedis getResource(){
 	     if (jedisPool == null) {
 	    	 JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-	    	 //Ö¸¶¨Á¬½Ó³ØÖĞ×î´ó¿ÕÏĞÁ¬½ÓÊı
+	    	 //æŒ‡å®šè¿æ¥æ± ä¸­æœ€å¤§ç©ºé—²è¿æ¥æ•°
 	    	 jedisPoolConfig.setMaxIdle(10);
-	    	 //Á´½Ó³ØÖĞ´´½¨µÄ×î´óÁ¬½ÓÊı
+	    	 //é“¾æ¥æ± ä¸­åˆ›å»ºçš„æœ€å¤§è¿æ¥æ•°
 	    	 jedisPoolConfig.setMaxTotal(100);
-	    	 //ÉèÖÃ´´½¨Á´½ÓµÄ³¬Ê±Ê±¼ä
+	    	 //è®¾ç½®åˆ›å»ºé“¾æ¥çš„è¶…æ—¶æ—¶é—´
 	    	 jedisPoolConfig.setMaxWaitMillis(2000);
-	    	 //±íÊ¾Á¬½Ó³ØÔÚ´´½¨Á´½ÓµÄÊ±ºò»áÏÈ²âÊÔÒ»ÏÂÁ´½ÓÊÇ·ñ¿ÉÓÃ£¬ÕâÑù¿ÉÒÔ±£Ö¤Á¬½Ó³ØÖĞµÄÁ´½Ó¶¼¿ÉÓÃµÄ¡£
+	    	 //è¡¨ç¤ºè¿æ¥æ± åœ¨åˆ›å»ºé“¾æ¥çš„æ—¶å€™ä¼šå…ˆæµ‹è¯•ä¸€ä¸‹é“¾æ¥æ˜¯å¦å¯ç”¨ï¼Œè¿™æ ·å¯ä»¥ä¿è¯è¿æ¥æ± ä¸­çš„é“¾æ¥éƒ½å¯ç”¨çš„ã€‚
 	    	 jedisPoolConfig.setTestOnBorrow(true);
 	    	 jedisPool = new JedisPool(jedisPoolConfig, "10.0.0.10", 6379);
 	     }
@@ -69,9 +78,9 @@ public class JedisUtils {
 //		}
 	
 	/**
-	 * »ñÈ¡»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–ç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static String get(String key) {
 		String value = null;
@@ -92,9 +101,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–ç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static Object getObject(String key) {
 		Object value = null;
@@ -114,10 +123,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃ»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®ç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static String set(String key, String value, int cacheSeconds) {
@@ -139,10 +148,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃ»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®ç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static String setObject(String key, Object value, int cacheSeconds) {
@@ -164,9 +173,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡List»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–Listç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static List<String> getList(String key) {
 		List<String> value = null;
@@ -186,9 +195,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡List»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–Listç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static List<Object> getObjectList(String key) {
 		List<Object> value = null;
@@ -212,10 +221,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃList»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Listç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static long setList(String key, List<String> value, int cacheSeconds) {
@@ -240,10 +249,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃList»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Listç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static long setObjectList(String key, List<Object> value, int cacheSeconds) {
@@ -272,9 +281,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÏòList»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Listç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long listAdd(String key, String... value) {
@@ -293,9 +302,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÏòList»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Listç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long listObjectAdd(String key, Object... value) {
@@ -318,9 +327,9 @@ public class JedisUtils {
 	}
  
 	/**
-	 * »ñÈ¡»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–ç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static Set<String> getSet(String key) {
 		Set<String> value = null;
@@ -340,9 +349,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–ç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static Set<Object> getObjectSet(String key) {
 		Set<Object> value = null;
@@ -366,10 +375,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃSet»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Setç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static long setSet(String key, Set<String> value, int cacheSeconds) {
@@ -394,10 +403,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃSet»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Setç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static long setObjectSet(String key, Set<Object> value, int cacheSeconds) {
@@ -426,9 +435,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÏòSet»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Setç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long setSetAdd(String key, String... value) {
@@ -447,9 +456,9 @@ public class JedisUtils {
 	}
  
 	/**
-	 * ÏòSet»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Setç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long setSetObjectAdd(String key, Object... value) {
@@ -472,9 +481,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡Map»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–Mapç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static Map<String, String> getMap(String key) {
 		Map<String, String> value = null;
@@ -494,9 +503,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »ñÈ¡Map»º´æ
-	 * @param key ¼ü
-	 * @return Öµ
+	 * è·å–Mapç¼“å­˜
+	 * @param key é”®
+	 * @return å€¼
 	 */
 	public static Map<String, Object> getObjectMap(String key) {
 		Map<String, Object> value = null;
@@ -521,10 +530,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃMap»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Mapç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static String setMap(String key, Map<String, String> value, int cacheSeconds) {
@@ -549,10 +558,10 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÉèÖÃMap»º´æ
-	 * @param key ¼ü
-	 * @param value Öµ
-	 * @param cacheSeconds ³¬Ê±Ê±¼ä£¬0Îª²»³¬Ê±
+	 * è®¾ç½®Mapç¼“å­˜
+	 * @param key é”®
+	 * @param value å€¼
+	 * @param cacheSeconds è¶…æ—¶æ—¶é—´ï¼Œ0ä¸ºä¸è¶…æ—¶
 	 * @return
 	 */
 	public static String setObjectMap(String key, Map<String, Object> value, int cacheSeconds) {
@@ -581,9 +590,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÏòMap»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Mapç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static String mapPut(String key, Map<String, String> value) {
@@ -602,9 +611,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÏòMap»º´æÖĞÌí¼ÓÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * å‘Mapç¼“å­˜ä¸­æ·»åŠ å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static String mapObjectPut(String key, Map<String, Object> value) {
@@ -627,9 +636,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÒÆ³ıMap»º´æÖĞµÄÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * ç§»é™¤Mapç¼“å­˜ä¸­çš„å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long mapRemove(String key, String mapKey) {
@@ -648,9 +657,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÒÆ³ıMap»º´æÖĞµÄÖµ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * ç§»é™¤Mapç¼“å­˜ä¸­çš„å€¼
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static long mapObjectRemove(String key, String mapKey) {
@@ -669,9 +678,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÅĞ¶ÏMap»º´æÖĞµÄKeyÊÇ·ñ´æÔÚ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * åˆ¤æ–­Mapç¼“å­˜ä¸­çš„Keyæ˜¯å¦å­˜åœ¨
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static boolean mapExists(String key, String mapKey) {
@@ -690,9 +699,9 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÅĞ¶ÏMap»º´æÖĞµÄKeyÊÇ·ñ´æÔÚ
-	 * @param key ¼ü
-	 * @param value Öµ
+	 * åˆ¤æ–­Mapç¼“å­˜ä¸­çš„Keyæ˜¯å¦å­˜åœ¨
+	 * @param key é”®
+	 * @param value å€¼
 	 * @return
 	 */
 	public static boolean mapObjectExists(String key, String mapKey) {
@@ -711,8 +720,8 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * É¾³ı»º´æ
-	 * @param key ¼ü
+	 * åˆ é™¤ç¼“å­˜
+	 * @param key é”®
 	 * @return
 	 */
 	public static long del(String key) {
@@ -735,8 +744,8 @@ public class JedisUtils {
 	}
  
 	/**
-	 * É¾³ı»º´æ
-	 * @param key ¼ü
+	 * åˆ é™¤ç¼“å­˜
+	 * @param key é”®
 	 * @return
 	 */
 	public static long delObject(String key) {
@@ -759,8 +768,8 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »º´æÊÇ·ñ´æÔÚ
-	 * @param key ¼ü
+	 * ç¼“å­˜æ˜¯å¦å­˜åœ¨
+	 * @param key é”®
 	 * @return
 	 */
 	public static boolean exists(String key) {
@@ -779,8 +788,8 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * »º´æÊÇ·ñ´æÔÚ
-	 * @param key ¼ü
+	 * ç¼“å­˜æ˜¯å¦å­˜åœ¨
+	 * @param key é”®
 	 * @return
 	 */
 	public static boolean existsObject(String key) {
@@ -799,7 +808,7 @@ public class JedisUtils {
 	}
  
 	/**
-	 * ¹é»¹×ÊÔ´
+	 * å½’è¿˜èµ„æº
 	 * @param jedis
 	 * @param isBroken
 	 */
@@ -810,7 +819,7 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * ÊÍ·Å×ÊÔ´
+	 * é‡Šæ”¾èµ„æº
 	 * @param jedis
 	 * @param isBroken
 	 */
@@ -821,7 +830,7 @@ public class JedisUtils {
 	}
  
 	/**
-	 * »ñÈ¡byte[]ÀàĞÍKey
+	 * è·å–byte[]ç±»å‹Key
 	 * @param key
 	 * @return
 	 * @throws IOException 
@@ -835,7 +844,7 @@ public class JedisUtils {
 	}
 	
 	/**
-	 * Object×ª»»byte[]ÀàĞÍ
+	 * Objectè½¬æ¢byte[]ç±»å‹
 	 * @param key
 	 * @return
 	 * @throws IOException 
@@ -845,7 +854,7 @@ public class JedisUtils {
 	}
  
 	/**
-	 * byte[]ĞÍ×ª»»Object
+	 * byte[]å‹è½¬æ¢Object
 	 * @param key
 	 * @return
 	 * @throws IOException 
@@ -854,16 +863,71 @@ public class JedisUtils {
 	public static Object toObject(byte[] bytes) throws ClassNotFoundException, IOException{
 		return ObjectUtils.unserialize(bytes);
 	}
+
+    /**
+     * å°è¯•è·å–åˆ†å¸ƒå¼é”
+     * @param lockKey é”
+     * @param requestId è¯·æ±‚æ ‡è¯†
+     * @param expireTime è¶…æœŸæ—¶é—´(å•ä½ ms)
+     * @return æ˜¯å¦è·å–æˆåŠŸ
+     */
+    public static boolean tryGetDistributedLock(String lockKey, String requestId, int expireTime) {
+    	boolean lockResult = false;
+		Jedis jedis = null;
+		try {
+			jedis = getResource();
+			String result = jedis.set(lockKey, requestId, SET_IF_NOT_EXIST, SET_WITH_EXPIRE_TIME, expireTime);
+	        if (LOCK_SUCCESS.equals(result)) {
+	        	lockResult =  true;;
+	        }
+            logger.debug("tryGetDistributedLock lockKey:{} | requestId:{} | expireTime:{}", lockKey, requestId, expireTime);
+		} catch (Exception e) {
+			logger.warn("tryGetDistributedLock lockKey:{} | requestId:{} | expireTime:{}", lockKey, requestId, expireTime, e);
+		} finally {
+			returnResource(jedis);
+		}
+		 return lockResult;
+    }
+    
+    /**
+     * é‡Šæ”¾åˆ†å¸ƒå¼é”
+     * @param lockKey é”
+     * @param requestId è¯·æ±‚æ ‡è¯†
+     * @return æ˜¯å¦é‡Šæ”¾æˆåŠŸ
+     */
+    public static boolean releaseDistributedLock(String lockKey, String requestId) {
+    	boolean releaseLock = false;
+		Jedis jedis = null;
+		try {
+			String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+			jedis = getResource();
+			Object result = jedis.eval(script, Collections.singletonList(lockKey), Collections.singletonList(requestId));
+			if (RELEASE_SUCCESS.equals(result)) {
+				releaseLock = true;
+			}
+			logger.debug("tryGetDistributedLock lockKey:{} | requestId:{} | expireTime:{}", lockKey, requestId);
+		} catch (Exception e) {
+			logger.warn("tryGetDistributedLock lockKey:{} | requestId:{}", lockKey, requestId, e);
+		} finally {
+			returnResource(jedis);
+		}
+		
+        return releaseLock;
+    }
 		 
 	public static void main(String[] args) {
-		SutdentTest s = new SutdentTest();
-		s.setName("fengdezhi");
-		s.setAge(24);
 		
-		JedisUtils.setObject("object", s, 0);
-		SutdentTest stu = (SutdentTest) JedisUtils.getObject("object");
-		System.err.println(stu.getName());
+		String lockKey = "test";
+		String requestId = "666666";
 		
+
+		boolean lock = JedisUtils.tryGetDistributedLock(lockKey, requestId, 60000);
+		Jedis jedis  =  JedisUtils.getResource();
+		System.out.println(jedis.ttl(lockKey));
+//		System.out.println("lock:" + lock);
+		
+		boolean lock1 = JedisUtils.tryGetDistributedLock(lockKey, requestId, 60000);
+		System.out.println("lock1:" + lock1);
 	}
 
 }

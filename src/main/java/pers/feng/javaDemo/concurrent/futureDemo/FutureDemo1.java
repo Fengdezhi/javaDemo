@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Ê¹ÓÃCallable+Future»ñÈ¡Ö´ĞĞ½á¹û <br/>
- * Ó¦ÓÃ³¡¾°£ºÏß³ÌAĞèÒªÏß³ÌBµÄÖ´ĞĞ½á¹û£¬µ«Ã»±ØÒªÒ»Ö±µÈ´ıÏß³ÌBÖ´ĞĞÍê£¬Õâ¸öÊ±ºò¿ÉÒÔÏÈÄÃµ½Î´À´µÄFuture¶ÔÏó£¬µÈÏß³ÌBÖ´ĞĞÍêÔÙÀ´È¡ÕæÊµ½á¹û
+ * ä½¿ç”¨Callable+Futureè·å–æ‰§è¡Œç»“æœ <br/>
+ * åº”ç”¨åœºæ™¯ï¼šçº¿ç¨‹Aéœ€è¦çº¿ç¨‹Bçš„æ‰§è¡Œç»“æœï¼Œä½†æ²¡å¿…è¦ä¸€ç›´ç­‰å¾…çº¿ç¨‹Bæ‰§è¡Œå®Œï¼Œè¿™ä¸ªæ—¶å€™å¯ä»¥å…ˆæ‹¿åˆ°æœªæ¥çš„Futureå¯¹è±¡ï¼Œç­‰çº¿ç¨‹Bæ‰§è¡Œå®Œå†æ¥å–çœŸå®ç»“æœ
  * @author fengdezhi
  */
 public class FutureDemo1 {
@@ -20,7 +20,7 @@ public class FutureDemo1 {
         ExecutorService executor = Executors.newCachedThreadPool();
         Future<Integer> result = executor.submit(new Task());
         
-        executor.shutdown(); //ÒÑ¾­Ìí¼Óµ½¶ÓÁĞÖĞµÄÈÎÎñ¶Ô¼ÌĞøÖ´ĞĞ
+        executor.shutdown(); //å·²ç»æ·»åŠ åˆ°é˜Ÿåˆ—ä¸­çš„ä»»åŠ¡å¯¹ç»§ç»­æ‰§è¡Œ
          
         try {
             Thread.sleep(1000);
@@ -28,16 +28,16 @@ public class FutureDemo1 {
             e1.printStackTrace();
         }
          
-        log.debug("Ö÷Ïß³ÌÔÚÖ´ĞĞÈÎÎñ");
+        log.debug("ä¸»çº¿ç¨‹åœ¨æ‰§è¡Œä»»åŠ¡");
          
         try {
-        	log.debug("taskÔËĞĞ½á¹û{}", result.get());
+        	log.debug("taskè¿è¡Œç»“æœ{}", result.get());
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
          
-        log.debug("ËùÓĞÈÎÎñÖ´ĞĞÍê±Ï");
+        log.debug("æ‰€æœ‰ä»»åŠ¡æ‰§è¡Œå®Œæ¯•");
     } 
 }

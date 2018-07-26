@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Ê¹ÓÃCallable+FutureTask»ñÈ¡Ö´ĞĞ½á¹û <br/>
+ * ä½¿ç”¨Callable+FutureTaskè·å–æ‰§è¡Œç»“æœ <br/>
  * 
- * Ó¦ÓÃ³¡¾°£ºÏß³ÌAĞèÒªÏß³ÌBµÄÖ´ĞĞ½á¹û£¬µ«Ã»±ØÒªÒ»Ö±µÈ´ıÏß³ÌBÖ´ĞĞÍê£¬Õâ¸öÊ±ºò¿ÉÒÔÏÈÄÃµ½Î´À´µÄFuture¶ÔÏó£¬µÈÏß³ÌBÖ´ĞĞÍêÔÙÀ´È¡ÕæÊµ½á¹û
+ * åº”ç”¨åœºæ™¯ï¼šçº¿ç¨‹Aéœ€è¦çº¿ç¨‹Bçš„æ‰§è¡Œç»“æœï¼Œä½†æ²¡å¿…è¦ä¸€ç›´ç­‰å¾…çº¿ç¨‹Bæ‰§è¡Œå®Œï¼Œè¿™ä¸ªæ—¶å€™å¯ä»¥å…ˆæ‹¿åˆ°æœªæ¥çš„Futureå¯¹è±¡ï¼Œç­‰çº¿ç¨‹Bæ‰§è¡Œå®Œå†æ¥å–çœŸå®ç»“æœ
  * @author fengdezhi
  *
  */
@@ -19,13 +19,13 @@ public class FutureDemo2 {
 	private static final Logger log = LoggerFactory.getLogger(FutureDemo2.class);
 	
     public static void main(String[] args) {
-        //µÚÒ»ÖÖ·½Ê½
+        //ç¬¬ä¸€ç§æ–¹å¼
         ExecutorService executor = Executors.newCachedThreadPool();
         FutureTask<Integer> futureTask = new FutureTask<Integer>(new Task());
         executor.submit(futureTask);
         executor.shutdown();
          
-        //µÚ¶şÖÖ·½Ê½£¬×¢ÒâÕâÖÖ·½Ê½ºÍµÚÒ»ÖÖ·½Ê½Ğ§¹ûÊÇÀàËÆµÄ£¬Ö»²»¹ıÒ»¸öÊ¹ÓÃµÄÊÇExecutorService£¬Ò»¸öÊ¹ÓÃµÄÊÇThread
+        //ç¬¬äºŒç§æ–¹å¼ï¼Œæ³¨æ„è¿™ç§æ–¹å¼å’Œç¬¬ä¸€ç§æ–¹å¼æ•ˆæœæ˜¯ç±»ä¼¼çš„ï¼Œåªä¸è¿‡ä¸€ä¸ªä½¿ç”¨çš„æ˜¯ExecutorServiceï¼Œä¸€ä¸ªä½¿ç”¨çš„æ˜¯Thread
         /*Task task = new Task();
         FutureTask<Integer> futureTask = new FutureTask<Integer>(task);
         Thread thread = new Thread(futureTask);
@@ -37,16 +37,16 @@ public class FutureDemo2 {
             e1.printStackTrace();
         }
         
-        log.debug("Ö÷Ïß³ÌÔÚÖ´ĞĞÈÎÎñ");
+        log.debug("ä¸»çº¿ç¨‹åœ¨æ‰§è¡Œä»»åŠ¡");
          
         try {
-        	log.debug("taskÔËĞĞ½á¹û{}",futureTask.get());
+        	log.debug("taskè¿è¡Œç»“æœ{}",futureTask.get());
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
          
-        log.debug("ËùÓĞÈÎÎñÖ´ĞĞÍê±Ï");
+        log.debug("æ‰€æœ‰ä»»åŠ¡æ‰§è¡Œå®Œæ¯•");
     } 
 }

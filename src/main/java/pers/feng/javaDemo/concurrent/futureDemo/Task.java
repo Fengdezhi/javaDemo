@@ -6,14 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ×ÓÈÎÎñ
+ * å­ä»»åŠ¡
  * @author fengdezhi
  */
 public class Task implements Callable<Integer>{
 	private static final Logger log = LoggerFactory.getLogger(Task.class);
 	
     public Integer call() throws Exception {
-    	log.debug("×ÓÏß³ÌÔÚ½øĞĞ¼ÆËã");
+    	log.debug("å­çº¿ç¨‹åœ¨è¿›è¡Œè®¡ç®—");
     	
         Thread.sleep(3000);
         int sum = 0;
