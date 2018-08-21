@@ -899,6 +899,7 @@ public class JedisUtils {
     	boolean releaseLock = false;
 		Jedis jedis = null;
 		try {
+			//script语句意思: 如果获取到的 requestId 相等，则删除这个key，反之返回0
 			String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 			jedis = getResource();
 			Object result = jedis.eval(script, Collections.singletonList(lockKey), Collections.singletonList(requestId));
@@ -924,8 +925,8 @@ public class JedisUtils {
 		boolean lock = JedisUtils.tryGetDistributedLock(lockKey, requestId, 60000);
 		Jedis jedis  =  JedisUtils.getResource();
 		System.out.println(jedis.ttl(lockKey));
-//		System.out.println("lock:" + lock);
-		
+		System.out.println("lock:" + lock);
+		JedisUtils.releaseDistributedLock(lockKey, requestId);
 		boolean lock1 = JedisUtils.tryGetDistributedLock(lockKey, requestId, 60000);
 		System.out.println("lock1:" + lock1);
 	}
